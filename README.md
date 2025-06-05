@@ -1,4 +1,4 @@
-FECHA PRIMER ENTREGA:
-Aqui se encontraran los datasets elegidos para la primer entrega del curso Data Science I. 
-Los mismos fueron elegidos para que cumplan con la siguiente consgina que fue proporcionada en la plataforma:
+FECHA PRIMER ENTREGA: 7/06/2025
+Aqui se encontraran los datasets elegidos para la primera entrega del curso Data Science I, como la resolución de la consigna numero 1.
+
 
