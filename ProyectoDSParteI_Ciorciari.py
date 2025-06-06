@@ -5,6 +5,14 @@ import numpy as np
 import matplotlib.ticker as mticker
 from scipy.stats import mode
 
+#LA HIPOTESIS Y LA INTERPRETACION DE LAS GRAFICAS SE ENCUENTRAN EN EL ARCHIVO README.md 
+#DEL REPOSITORIO DE GITHUB CARGADO.
+
+
+
+
+
+
 personales = pd.read_csv(
     'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_personales.csv',
     encoding='latin1',
@@ -94,7 +102,7 @@ plt.gca().yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:,.0f}'))
 plt.tight_layout()
 plt.show()
 
-#3 Como es el impacto del lugar de residencia, la dedicacion y el genero con el sueldo neto?
+#3 Qué modalidad de trabajo presenta el salario neto promedio más alto y cómo es este valor con respecto a la moda de los salarios netos?
 #Para este grafico me parecio interesante agregar la moda de los sueldos netos, para ello
 salario_neto = pd.to_numeric(df_union['Ultimo salario (Neto)'], errors='coerce').dropna()
 moda_salario_neto=mode(salario_neto,keepdims=True).mode[0]
