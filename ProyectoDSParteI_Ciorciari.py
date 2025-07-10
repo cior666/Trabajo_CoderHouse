@@ -4,76 +4,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.ticker as mticker
 from scipy.stats import mode
-
+from carga_datos import carga_union_datos
+from Limpieza_datos import limpieza_datos, crear_df_burbuja
 #LA HIPOTESIS Y LA INTERPRETACION DE LAS GRAFICAS SE ENCUENTRAN EN EL ARCHIVO README.md 
 #DEL REPOSITORIO DE GITHUB CARGADO.
 
-
-
-
-
-
-personales = pd.read_csv(
-    'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_personales.csv',
-    encoding='latin1',
-    sep=';'
-)
-
-laborales = pd.read_csv(
-    'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_laborales.csv',
-    encoding='latin1',
-    sep=';'
-)
-
-estudios= pd.read_csv(
-    'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_estudios_superiores.csv',
-    encoding='latin1',
-    sep=';'
-)
-
-guardias=pd.read_csv(
-    'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_Guardias_laborales.csv',
-    encoding='latin1',
-    sep=';'
-)
-
-herramientas=pd.read_csv(
-    'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_Herramientas.csv',
-    encoding='latin1',
-    sep=';'
-)
-
-bootcamps=pd.read_csv(
-    'https://github.com/cior666/Trabajo_CoderHouse/raw/refs/heads/main/Datos_Bootcamps.csv',
-    encoding='latin1',
-    sep=';'
-)
-
-#Agrupo los datos de las tablas
-df_union = personales.merge(laborales, on='ID_Encuestado', how='outer') \
-                      .merge(estudios, on='ID_Encuestado', how='outer') \
-                      .merge(guardias, on='ID_Encuestado', how='outer') \
-                      .merge(herramientas, on='ID_Encuestado', how='outer') \
-                      .merge(bootcamps, on='ID_Encuestado', how='outer')
-
-
-#Limpieza de algunos campos de los datos, y creacion de columnas para las graficas 
-#para evitar errores convierto a numero la que se que necesito que lo sea
-df_union['Experiencia'] = pd.to_numeric(df_union['Experiencia'], errors='coerce')
-herramientas_cols = ['Plataforma (actual)', 'Software utilizado', 'Framework -Librerias', 'Bases de Datos', 'QA-Testing']
-df_union['Cantidad de herramientas usadas'] = df_union[herramientas_cols].notna().sum(axis=1)
-df_burbuja = df_union.dropna(subset=['Experiencia', 'Ultimo salario (bruto)', 'Modalidad', 'Cantidad de herramientas usadas'])
-
-
+df_union = carga_union_datos()
+df_limpio = limpieza_datos(df_union)
+df_burbuja = crear_df_burbuja(df_limpio)
 #PREGUNTAS CLAVE
 #1. Como varía el salario promedio según el nivel de estudios, el género y la experiencia laboral?
-df_union['Experiencia'] = pd.cut(
-    df_union['Experiencia'],
+df_limpio['Experiencia'] = pd.cut(
+    df_limpio['Experiencia'],
     bins=[0,1,5,10,20,50],
     labels=['0 años', '1-5 años', '6-10 años', '11-20 años', '20+ años']
 )
 plt.figure(figsize=(12, 6))
-sns.boxplot(data=df_union, x='Nivel de estudio', y='Ultimo salario (bruto)', hue='Genero')
+sns.boxplot(data=df_limpio, x='Nivel de estudio', y='Ultimo salario (bruto)', hue='Genero')
 plt.title('Salario según nivel de estudios y genero')
 plt.xticks(rotation=45)
 plt.gca().yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:,.0f}'))
@@ -106,9 +53,7 @@ plt.show()
 #Para este grafico me parecio interesante agregar la moda de los sueldos netos, para ello
 salario_neto = pd.to_numeric(df_union['Ultimo salario (Neto)'], errors='coerce').dropna()
 moda_salario_neto=mode(salario_neto,keepdims=True).mode[0]
-#para evitar errores convierto a numero la que se que necesito que lo sea
-df_union['Ultimo salario (Neto)'] = pd.to_numeric(df_union['Ultimo salario (Neto)'], errors='coerce')
-df_agrup=df_union.groupby('Modalidad')['Ultimo salario (Neto)'].mean().sort_values(ascending=False)
+df_agrup=df_limpio.groupby('Modalidad')['Ultimo salario (Neto)'].mean().sort_values(ascending=False)
 plt.figure(figsize=(12, 6))
 sns.barplot(x=df_agrup.index, y=df_agrup.values, palette='viridis')
 plt.axhline(moda_salario_neto, color='red', linestyle='--', label=f'Moda salario neto: {moda_salario_neto:,.0f}')
@@ -122,7 +67,7 @@ plt.show()
 
 #4 Que cantidad de los encuestados recibieron una, dos, tres o mas actualizacion en el periodo 2022?
 plt.figure(figsize=(12,6))
-actualizaciones=df_union['Actualizaciones en 2022'].value_counts().sort_values(ascending=False)
+actualizaciones=df_limpio['Actualizaciones en 2022'].value_counts().sort_values(ascending=False)
 sns.barplot(
     x=actualizaciones.values,
     y=actualizaciones.index,
@@ -136,7 +81,7 @@ plt.tight_layout()
 plt.show()
 
 #Analisis de valores perdidos
-porcentaje_perdidos=(df_union.isnull().mean()*100).round(2)
+porcentaje_perdidos=(df_limpio.isnull().mean()*100).round(2)
 #como queremos ver los valores perdidos solo nos vamos a quedar con ellos entonces,
 porcentaje_perdidos=porcentaje_perdidos[porcentaje_perdidos>0]
 porcentaje_perdidos=porcentaje_perdidos.sort_values(ascending=False)
@@ -157,6 +102,4 @@ for bar in bars:
     )
 plt.tight_layout()
 plt.show()
-
-
 
