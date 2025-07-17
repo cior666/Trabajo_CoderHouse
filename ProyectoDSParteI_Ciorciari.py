@@ -12,6 +12,7 @@ from Limpieza_datos import limpieza_datos, crear_df_burbuja
 df_union = carga_union_datos()
 df_limpio = limpieza_datos(df_union)
 df_burbuja = crear_df_burbuja(df_limpio)
+
 #PREGUNTAS CLAVE
 #1. Como varía el salario promedio según el nivel de estudios, el género y la experiencia laboral?
 df_limpio['Experiencia'] = pd.cut(
@@ -51,7 +52,7 @@ plt.show()
 
 #3 Qué modalidad de trabajo presenta el salario neto promedio más alto y cómo es este valor con respecto a la moda de los salarios netos?
 #Para este grafico me parecio interesante agregar la moda de los sueldos netos, para ello
-salario_neto = pd.to_numeric(df_union['Ultimo salario (Neto)'], errors='coerce').dropna()
+salario_neto = pd.to_numeric(df_limpio['Ultimo salario (Neto)'], errors='coerce').dropna()
 moda_salario_neto=mode(salario_neto,keepdims=True).mode[0]
 df_agrup=df_limpio.groupby('Modalidad')['Ultimo salario (Neto)'].mean().sort_values(ascending=False)
 plt.figure(figsize=(12, 6))
